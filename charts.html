@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics Report — VideCode</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#090A14',
+            surface: '#10111E',
+            border:  '#1E2035',
+            primary: '#DF6B33',
+            'primary-hover': '#C85A24',
+            muted:   '#6B7280',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body:    ['Inter',   'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #090A14; font-family: 'Inter', sans-serif; }
+
+    .bg-grid {
+      background-image:
+        linear-gradient(rgba(30,32,53,0.55) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30,32,53,0.55) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .glow-blob {
+      position: fixed;
+      width: 520px; height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(223,107,51,0.09) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(60px);
+      z-index: 0;
+    }
+
+    /* Card */
+    .card {
+      background-color: #10111E;
+      border: 1px solid #1E2035;
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    /* KPI card hover glow */
+    .kpi-card {
+      background-color: #10111E;
+      border: 1px solid #1E2035;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .kpi-card:hover {
+      border-color: rgba(223,107,51,0.5);
+      box-shadow: 0 0 20px rgba(223,107,51,0.07);
+    }
+
+    /* Section heading */
+    .section-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Badge helpers */
+    .badge-up      { background-color: rgba(34,197,94,0.12);  color:#22c55e; }
+    .badge-down    { background-color: rgba(239,68,68,0.12);  color:#ef4444; }
+    .badge-neutral { background-color: rgba(107,114,128,0.12);color:#9ca3af; }
+    .badge-blue    { background-color: rgba(79,142,247,0.12); color:#4F8EF7; }
+
+    /* Tab buttons */
+    .tab-btn {
+      padding: 0.35rem 0.85rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6B7280;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+    }
+    .tab-btn:hover   { color: #d1d5db; background-color: rgba(30,32,53,0.7); }
+    .tab-btn.active  { background-color: #DF6B33; color: #fff; }
+
+    /* Table */
+    .tbl-row:hover   { background-color: rgba(30,32,53,0.5); }
+    .tbl-head th     { font-size: 0.75rem; font-weight: 500; color: #6B7280;
+                       padding: 0.875rem 1.25rem; border-bottom: 1px solid #1E2035; }
+    .tbl-body td     { padding: 0.75rem 1.25rem; font-size: 0.8125rem;
+                       border-bottom: 1px solid #1E2035; }
+
+    /* Progress bar */
+    .progress-track  { height: 5px; border-radius: 9999px; background: #1E2035; }
+    .progress-fill   { height: 5px; border-radius: 9999px; transition: width 0.6s ease; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar            { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track      { background: #090A14; }
+    ::-webkit-scrollbar-thumb      { background: #1E2035; border-radius: 3px; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-bg bg-grid relative">
+
+  <!-- Glow blobs -->
+  <div class="glow-blob -top-40 -right-40"></div>
+  <div class="glow-blob -bottom-40 -left-40 opacity-60"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════════════════════════ -->
+  <header class="sticky top-0 z-50 border-b"
+          style="background-color:rgba(9,10,20,0.92); border-color:#1E2035; backdrop-filter:blur(14px);">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5 flex-shrink-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color:#DF6B33;">
+          <i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>
+        </div>
+        <span class="text-white text-xl tracking-tight" style="font-family:'Poppins',sans-serif; font-weight:800;">VideCode</span>
+        <span class="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full"
+              style="background-color:#1E2035; color:#6B7280;">
+          <i data-lucide="bar-chart-2" class="w-3 h-3"></i> Analytics
+        </span>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg"
+             style="background-color:#10111E; border:1px solid #1E2035; color:#6B7280;">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i> FY 2024
+        </div>
+
+        <button class="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
+                style="background-color:#DF6B33; color:#fff;"
+                onmouseover="this.style.backgroundColor='#C85A24'"
+                onmouseout="this.style.backgroundColor='#DF6B33'">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Export</span>
+        </button>
+
+        <a href="login.html" class="flex items-center gap-1.5 text-sm transition-colors px-2 py-1.5"
+           style="color:#6B7280;"
+           onmouseover="this.style.color='#d1d5db'"
+           onmouseout="this.style.color='#6B7280'">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Sign In</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════════════════════════ -->
+  <main class="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+
+    <!-- Page title + period tabs -->
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div>
+        <h1 class="text-white text-2xl sm:text-3xl"
+            style="font-family:'Poppins',sans-serif; font-weight:700;">E-Commerce Analytics</h1>
+        <p class="text-sm mt-1.5" style="color:#6B7280;">
+          Sales revenue · Business performance · Marketing metrics &nbsp;·&nbsp; FY 2024
+        </p>
+      </div>
+      <div class="flex items-center gap-1 p-1 rounded-xl flex-shrink-0"
+           style="background-color:#10111E; border:1px solid #1E2035;">
+        <button class="tab-btn active" onclick="setTab(this,'full')">Full Year</button>
+        <button class="tab-btn"        onclick="setTab(this,'q1')">Q1</button>
+        <button class="tab-btn"        onclick="setTab(this,'q2')">Q2</button>
+        <button class="tab-btn"        onclick="setTab(this,'q3')">Q3</button>
+        <button class="tab-btn"        onclick="setTab(this,'q4')">Q4</button>
+      </div>
+    </div>
+
+    <!-- ── KPI Cards ─────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <div class="kpi-card">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+               style="background-color:rgba(223,107,51,0.12);">
+            <i data-lucide="dollar-sign" style="color:#DF6B33; width:20px; height:20px;"></i>
+          </div>
+          <span class="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full badge-up">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>+23.4%
+          </span>
+        </div>
+        <p class="text-xs mb-0.5" style="color:#6B7280;">Total Revenue</p>
+        <p class="text-2xl font-semibold text-white">$2.58M</p>
+        <p class="text-xs mt-1" style="color:#6B7280;">vs $2.09M prev year</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+               style="background-color:rgba(79,142,247,0.12);">
+            <i data-lucide="shopping-bag" style="color:#4F8EF7; width:20px; height:20px;"></i>
+          </div>
+          <span class="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full badge-up">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>+18.7%
+          </span>
+        </div>
+        <p class="text-xs mb-0.5" style="color:#6B7280;">Total Orders</p>
+        <p class="text-2xl font-semibold text-white">36,269</p>
+        <p class="text-xs mt-1" style="color:#6B7280;">vs 30,555 prev year</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+               style="background-color:rgba(34,197,94,0.12);">
+            <i data-lucide="receipt" style="color:#22c55e; width:20px; height:20px;"></i>
+          </div>
+          <span class="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full badge-up">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>+3.9%
+          </span>
+        </div>
+        <p class="text-xs mb-0.5" style="color:#6B7280;">Avg Order Value</p>
+        <p class="text-2xl font-semibold text-white">$71.18</p>
+        <p class="text-xs mt-1" style="color:#6B7280;">vs $68.52 prev year</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+               style="background-color:rgba(234,179,8,0.12);">
+            <i data-lucide="percent" style="color:#eab308; width:20px; height:20px;"></i>
+          </div>
+          <span class="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full badge-up">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>+1.2pp
+          </span>
+        </div>
+        <p class="text-xs mb-0.5" style="color:#6B7280;">Net Profit Margin</p>
+        <p class="text-2xl font-semibold text-white">26.1%</p>
+        <p class="text-xs mt-1" style="color:#6B7280;">vs 24.9% prev year</p>
+      </div>
+
+    </div>
+
+    <!-- ── Revenue Analysis ──────────────────────────────────── -->
+    <section>
+      <h2 class="section-title text-lg mb-5 flex items-center gap-2">
+        <i data-lucide="bar-chart-2" style="color:#DF6B33; width:20px; height:20px;"></i>
+        Revenue Analysis
+      </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Monthly Revenue Bar Chart -->
+        <div class="card lg:col-span-2">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-5 gap-3">
+            <div>
+              <p class="font-semibold text-white">Monthly Revenue vs Profit</p>
+              <p class="text-xs mt-0.5" style="color:#6B7280;">Jan – Dec 2024 · USD</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs flex-shrink-0" style="color:#6B7280;">
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded" style="background:rgba(223,107,51,0.85);"></span>Revenue
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded" style="background:rgba(34,197,94,0.75);"></span>Profit
+              </span>
+            </div>
+          </div>
+          <div style="height:260px; position:relative;">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Revenue by Category Doughnut -->
+        <div class="card flex flex-col">
+          <div class="mb-4">
+            <p class="font-semibold text-white">Revenue by Category</p>
+            <p class="text-xs mt-0.5" style="color:#6B7280;">Share of total — FY 2024</p>
+          </div>
+          <div class="flex justify-center" style="height:190px; position:relative;">
+            <canvas id="categoryChart"></canvas>
+          </div>
+          <div class="mt-4 space-y-2.5 text-xs" id="categoryLegend"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Business Performance ──────────────────────────────── -->
+    <section>
+      <h2 class="section-title text-lg mb-5 flex items-center gap-2">
+        <i data-lucide="activity" style="color:#DF6B33; width:20px; height:20px;"></i>
+        Business Performance
+      </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Orders Bar Chart -->
+        <div class="card lg:col-span-2">
+          <div class="flex items-start justify-between mb-5">
+            <div>
+              <p class="font-semibold text-white">Monthly Order Volume</p>
+              <p class="text-xs mt-0.5" style="color:#6B7280;">Total orders fulfilled per month</p>
+            </div>
+          </div>
+          <div style="height:248px; position:relative;">
+            <canvas id="ordersChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Key metrics panel -->
+        <div class="card flex flex-col gap-5">
+          <p class="font-semibold text-white">Operational KPIs</p>
+
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs mb-2">
+                <span style="color:#9ca3af;">Conversion Rate</span>
+                <span class="text-white font-medium">3.24%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="background:#DF6B33; width:32.4%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-2">
+                <span style="color:#9ca3af;">Cart Abandonment</span>
+                <span class="font-medium" style="color:#ef4444;">68.5%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="background:#ef4444; width:68.5%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-2">
+                <span style="color:#9ca3af;">Repeat Purchase Rate</span>
+                <span class="text-white font-medium">41.2%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="background:#22c55e; width:41.2%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-2">
+                <span style="color:#9ca3af;">CSAT Score (4.3 / 5.0)</span>
+                <span class="text-white font-medium">86%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="background:#eab308; width:86%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-2">
+                <span style="color:#9ca3af;">Return Rate</span>
+                <span class="text-white font-medium">5.8%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="background:#a855f7; width:5.8%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto pt-4 border-t grid grid-cols-2 gap-4 text-center"
+               style="border-color:#1E2035;">
+            <div>
+              <p class="text-xl font-semibold text-white">4,821</p>
+              <p class="text-xs mt-0.5" style="color:#6B7280;">New Customers</p>
+            </div>
+            <div>
+              <p class="text-xl font-semibold text-white">14,928</p>
+              <p class="text-xs mt-0.5" style="color:#6B7280;">Active Customers</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Revenue Detail Table ──────────────────────────────── -->
+    <section>
+      <h2 class="section-title text-lg mb-5 flex items-center gap-2">
+        <i data-lucide="table-2" style="color:#DF6B33; width:20px; height:20px;"></i>
+        Monthly Revenue Breakdown
+      </h2>
+      <div class="rounded-2xl border overflow-hidden" style="border-color:#1E2035; background-color:#10111E;">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="tbl-head">
+              <tr>
+                <th class="text-left">Month</th>
+                <th class="text-right">Revenue</th>
+                <th class="text-right">Profit</th>
+                <th class="text-right hidden sm:table-cell">Orders</th>
+                <th class="text-right hidden sm:table-cell">Avg Order</th>
+                <th class="text-right">Margin</th>
+                <th class="text-right hidden md:table-cell">MoM Growth</th>
+              </tr>
+            </thead>
+            <tbody class="tbl-body" id="revenueTableBody"></tbody>
+            <!-- Footer row -->
+            <tfoot>
+              <tr style="background-color:rgba(30,32,53,0.35); border-top:1px solid #1E2035;">
+                <td class="px-5 py-3.5 text-xs font-semibold text-white">Total / Avg</td>
+                <td class="px-5 py-3.5 text-right text-xs font-semibold text-white">$2,581,400</td>
+                <td class="px-5 py-3.5 text-right text-xs font-semibold" style="color:#22c55e;">$685,450</td>
+                <td class="px-5 py-3.5 text-right text-xs font-semibold text-white hidden sm:table-cell">36,269</td>
+                <td class="px-5 py-3.5 text-right text-xs font-semibold text-white hidden sm:table-cell">$71.18</td>
+                <td class="px-5 py-3.5 text-right text-xs font-semibold text-white">26.5%</td>
+                <td class="px-5 py-3.5 text-right text-xs hidden md:table-cell" style="color:#6B7280;">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Marketing Performance ─────────────────────────────── -->
+    <section>
+      <h2 class="section-title text-lg mb-5 flex items-center gap-2">
+        <i data-lucide="megaphone" style="color:#DF6B33; width:20px; height:20px;"></i>
+        Marketing Performance
+      </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Traffic Sources Doughnut -->
+        <div class="card flex flex-col">
+          <div class="mb-4">
+            <p class="font-semibold text-white">Traffic Sources</p>
+            <p class="text-xs mt-0.5" style="color:#6B7280;">Session distribution — FY 2024</p>
+          </div>
+          <div class="flex justify-center" style="height:190px; position:relative;">
+            <canvas id="trafficChart"></canvas>
+          </div>
+          <div class="mt-4 space-y-2.5 text-xs" id="trafficLegend"></div>
+        </div>
+
+        <!-- Marketing Channel Horizontal Bar -->
+        <div class="card lg:col-span-2">
+          <div class="mb-5">
+            <p class="font-semibold text-white">Revenue by Marketing Channel</p>
+            <p class="text-xs mt-0.5" style="color:#6B7280;">Attributed revenue per channel — FY 2024</p>
+          </div>
+          <div style="height:248px; position:relative;">
+            <canvas id="marketingChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Marketing Metrics Table ───────────────────────────── -->
+    <section>
+      <h2 class="section-title text-lg mb-5 flex items-center gap-2">
+        <i data-lucide="target" style="color:#DF6B33; width:20px; height:20px;"></i>
+        Marketing Channel Metrics
+      </h2>
+      <div class="rounded-2xl border overflow-hidden" style="border-color:#1E2035; background-color:#10111E;">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="tbl-head">
+              <tr>
+                <th class="text-left">Channel</th>
+                <th class="text-right hidden sm:table-cell">Impressions</th>
+                <th class="text-right">Clicks</th>
+                <th class="text-right hidden md:table-cell">CTR</th>
+                <th class="text-right hidden lg:table-cell">CPC</th>
+                <th class="text-right">Conversions</th>
+                <th class="text-right">Revenue</th>
+                <th class="text-right hidden md:table-cell">ROAS</th>
+              </tr>
+            </thead>
+            <tbody class="tbl-body" id="marketingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 mt-12 border-t" style="border-color:#1E2035;">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded flex items-center justify-center" style="background-color:#DF6B33;">
+          <i data-lucide="play" class="text-white fill-white" style="width:12px; height:12px;"></i>
+        </div>
+        <span class="text-sm" style="color:#6B7280;">VideCode Analytics · FY 2024 Report</span>
+      </div>
+      <p class="text-xs text-center" style="color:#6B7280;">
+        Last updated: June 7, 2026 &nbsp;·&nbsp; Mock data for demonstration purposes only
+      </p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════════════════════════════ -->
+  <script>
+    lucide.createIcons();
+
+    // Tab switcher (decorative)
+    function setTab(el) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // ── Mock Data ──────────────────────────────────────────────
+    const MONTHS  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const REVENUE = [128500,142300,165800,158200,187400,201600,195300,218700,234100,247800,312500,389200];
+    const PROFIT  = [33200, 37150, 42850, 40980, 48700, 52410, 50470, 56860, 60870, 64430, 81250,116280];
+    const ORDERS  = [1842,  2103,  2456,  2318,  2714,  2891,  2756,  3124,  3287,  3445,  4231,  5102];
+
+    const CATEGORIES = {
+      labels: ['Electronics','Fashion','Home & Garden','Sports','Beauty','Books & Media'],
+      values: [35, 22, 18, 12, 8, 5],
+      colors: ['#DF6B33','#4F8EF7','#22c55e','#eab308','#a855f7','#ec4899'],
+    };
+
+    const TRAFFIC = {
+      labels: ['Organic Search','Google Ads','Facebook/IG','Email','Referral','Direct'],
+      values: [38, 24, 18, 12, 5, 3],
+      colors: ['#22c55e','#4F8EF7','#ec4899','#DF6B33','#eab308','#6B7280'],
+    };
+
+    const MKT_CHANNELS = ['Google Ads','Facebook Ads','Instagram','Email Marketing','Organic SEO','Referral'];
+    const MKT_REVENUE  = [450320, 281200, 214080, 673200, 774876, 93756];
+    const MKT_COLORS   = [
+      'rgba(79,142,247,0.85)',
+      'rgba(236,72,153,0.85)',
+      'rgba(168,85,247,0.85)',
+      'rgba(223,107,51,0.85)',
+      'rgba(34,197,94,0.85)',
+      'rgba(234,179,8,0.85)',
+    ];
+
+    const MKT_TABLE = [
+      { ch:'Google Ads',       icon:'search',    color:'#4F8EF7', imp:'2,450,000', clk:'73,500',  ctr:'3.0%',  cpc:'$0.85', conv:'3,675', rev:'$450,320', roas:'6.2x' },
+      { ch:'Facebook Ads',     icon:'thumbs-up', color:'#1877F2', imp:'3,820,000', clk:'57,300',  ctr:'1.5%',  cpc:'$0.62', conv:'2,292', rev:'$281,200', roas:'4.8x' },
+      { ch:'Instagram',        icon:'image',     color:'#ec4899', imp:'2,180,000', clk:'43,600',  ctr:'2.0%',  cpc:'$0.74', conv:'1,744', rev:'$214,080', roas:'5.6x' },
+      { ch:'Email Marketing',  icon:'mail',      color:'#DF6B33', imp:'—',         clk:'156,800', ctr:'24.5%', cpc:'—',     conv:'5,488', rev:'$673,200', roas:'22.4x'},
+      { ch:'Organic SEO',      icon:'globe',     color:'#22c55e', imp:'—',         clk:'210,400', ctr:'—',     cpc:'—',     conv:'6,312', rev:'$774,876', roas:'—'    },
+      { ch:'Referral',         icon:'share-2',   color:'#eab308', imp:'—',         clk:'38,200',  ctr:'—',     cpc:'—',     conv:'764',   rev:'$93,756',  roas:'—'    },
+    ];
+
+    // ── Chart.js Globals ───────────────────────────────────────
+    Chart.defaults.color          = '#6B7280';
+    Chart.defaults.borderColor    = '#1E2035';
+    Chart.defaults.font.family    = 'Inter, sans-serif';
+    Chart.defaults.font.size      = 11;
+
+    const GRID  = 'rgba(30,32,53,0.9)';
+    const TIP   = {
+      backgroundColor: '#10111E',
+      borderColor: '#1E2035',
+      borderWidth: 1,
+      titleColor: '#fff',
+      bodyColor: '#9ca3af',
+      padding: 10,
+      cornerRadius: 8,
+    };
+
+    // ── Monthly Revenue + Profit Bar ───────────────────────────
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'bar',
+      data: {
+        labels: MONTHS,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: REVENUE,
+            backgroundColor: 'rgba(223,107,51,0.85)',
+            borderRadius: 5,
+            borderSkipped: false,
+            barPercentage: 0.72,
+            categoryPercentage: 0.8,
+          },
+          {
+            label: 'Profit',
+            data: PROFIT,
+            backgroundColor: 'rgba(34,197,94,0.75)',
+            borderRadius: 5,
+            borderSkipped: false,
+            barPercentage: 0.72,
+            categoryPercentage: 0.8,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...TIP,
+            callbacks: {
+              label: c => ` ${c.dataset.label}: $${c.parsed.y.toLocaleString()}`,
+            },
+          },
+        },
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: '#6B7280' } },
+          y: {
+            grid: { color: GRID },
+            ticks: {
+              color: '#6B7280',
+              callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v),
+            },
+          },
+        },
+      },
+    });
+
+    // ── Category Doughnut ──────────────────────────────────────
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'doughnut',
+      data: {
+        labels: CATEGORIES.labels,
+        datasets: [{
+          data: CATEGORIES.values,
+          backgroundColor: CATEGORIES.colors,
+          borderColor: '#10111E',
+          borderWidth: 3,
+          hoverOffset: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...TIP,
+            callbacks: {
+              label: c => ` ${c.label}: ${c.parsed}%  ($${(2581400*c.parsed/100/1000).toFixed(0)}k)`,
+            },
+          },
+        },
+      },
+    });
+
+    // Category legend
+    const catEl = document.getElementById('categoryLegend');
+    CATEGORIES.labels.forEach((lbl, i) => {
+      const amt = (2581400 * CATEGORIES.values[i] / 100);
+      catEl.innerHTML += `
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2" style="color:#9ca3af;">
+            <span class="w-2.5 h-2.5 rounded-sm flex-shrink-0" style="background:${CATEGORIES.colors[i]};"></span>
+            ${lbl}
+          </span>
+          <span class="flex items-center gap-3">
+            <span class="font-medium text-white">${CATEGORIES.values[i]}%</span>
+            <span style="color:#6B7280; min-width:44px; text-align:right;">$${(amt/1000).toFixed(0)}k</span>
+          </span>
+        </div>`;
+    });
+
+    // ── Orders Bar ─────────────────────────────────────────────
+    new Chart(document.getElementById('ordersChart'), {
+      type: 'bar',
+      data: {
+        labels: MONTHS,
+        datasets: [{
+          label: 'Orders',
+          data: ORDERS,
+          backgroundColor: MONTHS.map((_, i) => {
+            // Holiday months slightly brighter
+            return i >= 10 ? 'rgba(79,142,247,1)' : 'rgba(79,142,247,0.72)';
+          }),
+          borderRadius: 5,
+          borderSkipped: false,
+          barPercentage: 0.7,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...TIP,
+            callbacks: { label: c => ` Orders: ${c.parsed.y.toLocaleString()}` },
+          },
+        },
+        scales: {
+          x: { grid: { color: GRID }, ticks: { color: '#6B7280' } },
+          y: {
+            grid: { color: GRID },
+            ticks: { color: '#6B7280', callback: v => v.toLocaleString() },
+          },
+        },
+      },
+    });
+
+    // ── Traffic Doughnut ───────────────────────────────────────
+    new Chart(document.getElementById('trafficChart'), {
+      type: 'doughnut',
+      data: {
+        labels: TRAFFIC.labels,
+        datasets: [{
+          data: TRAFFIC.values,
+          backgroundColor: TRAFFIC.colors,
+          borderColor: '#10111E',
+          borderWidth: 3,
+          hoverOffset: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...TIP,
+            callbacks: { label: c => ` ${c.label}: ${c.parsed}%` },
+          },
+        },
+      },
+    });
+
+    // Traffic legend
+    const trafEl = document.getElementById('trafficLegend');
+    TRAFFIC.labels.forEach((lbl, i) => {
+      trafEl.innerHTML += `
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2" style="color:#9ca3af;">
+            <span class="w-2.5 h-2.5 rounded-sm flex-shrink-0" style="background:${TRAFFIC.colors[i]};"></span>
+            ${lbl}
+          </span>
+          <span class="font-medium text-white">${TRAFFIC.values[i]}%</span>
+        </div>`;
+    });
+
+    // ── Marketing Horizontal Bar ───────────────────────────────
+    new Chart(document.getElementById('marketingChart'), {
+      type: 'bar',
+      data: {
+        labels: MKT_CHANNELS,
+        datasets: [{
+          label: 'Revenue',
+          data: MKT_REVENUE,
+          backgroundColor: MKT_COLORS,
+          borderRadius: 5,
+          borderSkipped: false,
+          barPercentage: 0.65,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            ...TIP,
+            callbacks: { label: c => ` Revenue: $${c.parsed.x.toLocaleString()}` },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: GRID },
+            ticks: {
+              color: '#6B7280',
+              callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v),
+            },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#d1d5db' },
+          },
+        },
+      },
+    });
+
+    // ── Revenue Table ──────────────────────────────────────────
+    const revTbody = document.getElementById('revenueTableBody');
+    MONTHS.forEach((m, i) => {
+      const margin = (PROFIT[i] / REVENUE[i] * 100).toFixed(1);
+      const aov    = (REVENUE[i] / ORDERS[i]).toFixed(2);
+      const mom    = i === 0
+        ? null
+        : ((REVENUE[i] - REVENUE[i-1]) / REVENUE[i-1] * 100).toFixed(1);
+      const momUp  = mom !== null && parseFloat(mom) >= 0;
+
+      revTbody.innerHTML += `
+        <tr class="tbl-row">
+          <td class="font-medium text-white">${m} 2024</td>
+          <td class="text-right text-white">$${REVENUE[i].toLocaleString()}</td>
+          <td class="text-right" style="color:#22c55e;">$${PROFIT[i].toLocaleString()}</td>
+          <td class="text-right text-white hidden sm:table-cell">${ORDERS[i].toLocaleString()}</td>
+          <td class="text-right hidden sm:table-cell" style="color:#9ca3af;">$${aov}</td>
+          <td class="text-right">
+            <span class="text-xs px-2 py-0.5 rounded-full ${parseFloat(margin)>=25?'badge-up':'badge-neutral'}">${margin}%</span>
+          </td>
+          <td class="text-right hidden md:table-cell">
+            ${mom === null
+              ? '<span style="color:#6B7280;">—</span>'
+              : `<span class="text-xs px-2 py-0.5 rounded-full ${momUp?'badge-up':'badge-down'}">${momUp?'+':''}${mom}%</span>`}
+          </td>
+        </tr>`;
+    });
+
+    // ── Marketing Table ────────────────────────────────────────
+    const mktTbody = document.getElementById('marketingTableBody');
+    MKT_TABLE.forEach(r => {
+      mktTbody.innerHTML += `
+        <tr class="tbl-row">
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                   style="background-color:${r.color}22;">
+                <i data-lucide="${r.icon}" style="width:14px;height:14px;color:${r.color};"></i>
+              </div>
+              <span class="font-medium text-white">${r.ch}</span>
+            </div>
+          </td>
+          <td class="text-right hidden sm:table-cell" style="color:#9ca3af;">${r.imp}</td>
+          <td class="text-right text-white">${r.clk}</td>
+          <td class="text-right hidden md:table-cell" style="color:#9ca3af;">${r.ctr}</td>
+          <td class="text-right hidden lg:table-cell" style="color:#9ca3af;">${r.cpc}</td>
+          <td class="text-right text-white">${r.conv}</td>
+          <td class="text-right font-medium" style="color:#22c55e;">${r.rev}</td>
+          <td class="text-right hidden md:table-cell">
+            ${r.roas === '—'
+              ? '<span style="color:#6B7280;">—</span>'
+              : `<span class="badge-up text-xs px-2 py-0.5 rounded-full">${r.roas}</span>`}
+          </td>
+        </tr>`;
+    });
+
+    // Re-init Lucide for dynamically injected icons in tables
+    lucide.createIcons();
+  </script>
+</body>
+</html>
