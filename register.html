@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — VideCode</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#090A14',
+            surface: '#10111E',
+            border:  '#1E2035',
+            primary: '#DF6B33',
+            'primary-hover': '#C85A24',
+            muted:   '#6B7280',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body:    ['Inter',   'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #090A14; font-family: 'Inter', sans-serif; }
+
+    .input-field:focus {
+      outline: none;
+      border-color: #DF6B33;
+      box-shadow: 0 0 0 3px rgba(223, 107, 51, 0.18);
+    }
+
+    .select-field:focus {
+      outline: none;
+      border-color: #DF6B33;
+      box-shadow: 0 0 0 3px rgba(223, 107, 51, 0.18);
+    }
+
+    /* Remove default select arrow on Firefox */
+    .select-field { -moz-appearance: none; -webkit-appearance: none; appearance: none; }
+
+    .social-btn:hover { transform: translateY(-2px); }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #1E2035, transparent);
+    }
+
+    .bg-grid {
+      background-image:
+        linear-gradient(rgba(30,32,53,0.6) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30,32,53,0.6) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .glow-blob {
+      position: fixed;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(223,107,51,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(60px);
+    }
+
+    .toggle-pw { cursor: pointer; user-select: none; }
+
+    /* Strength bar segments */
+    .strength-seg {
+      height: 3px;
+      border-radius: 9999px;
+      flex: 1;
+      background-color: #1E2035;
+      transition: background-color 0.3s;
+    }
+
+    /* Scrollbar subtle */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #090A14; }
+    ::-webkit-scrollbar-thumb { background: #1E2035; border-radius: 3px; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-bg bg-grid flex items-center justify-center p-4 py-10 relative overflow-x-hidden">
+
+  <!-- Decorative glow -->
+  <div class="glow-blob -top-32 -right-32"></div>
+  <div class="glow-blob -bottom-48 -left-24 opacity-70"></div>
+
+  <!-- Card -->
+  <div class="relative z-10 w-full max-w-lg">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-8">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background-color:#DF6B33;">
+          <i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>
+        </div>
+        <span class="text-white text-2xl tracking-tight" style="font-family:'Poppins',sans-serif; font-weight:800;">VideCode</span>
+      </div>
+    </div>
+
+    <!-- Panel -->
+    <div class="rounded-2xl border p-8 shadow-2xl shadow-black/60" style="background-color:#10111E; border-color:#1E2035;">
+
+      <!-- Heading -->
+      <div class="mb-7 text-center">
+        <h1 class="text-white text-2xl mb-1" style="font-family:'Poppins',sans-serif; font-weight:700;">Create your account</h1>
+        <p class="text-sm" style="color:#6B7280;">Join VideCode and start learning today</p>
+      </div>
+
+      <!-- Social sign-up (top) -->
+      <div class="grid grid-cols-3 gap-3 mb-6">
+
+        <!-- Google -->
+        <button
+          type="button"
+          class="social-btn flex items-center justify-center gap-2 rounded-xl py-3 text-sm transition-all duration-200"
+          style="border:1px solid #1E2035; background-color:#090A14; color:#d1d5db;"
+          onmouseover="this.style.borderColor='#4b5563'; this.style.color='#fff';"
+          onmouseout="this.style.borderColor='#1E2035'; this.style.color='#d1d5db';"
+          aria-label="Sign up with Google"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="hidden sm:inline text-xs font-medium">Google</span>
+        </button>
+
+        <!-- GitHub -->
+        <button
+          type="button"
+          class="social-btn flex items-center justify-center gap-2 rounded-xl py-3 text-sm transition-all duration-200"
+          style="border:1px solid #1E2035; background-color:#090A14; color:#d1d5db;"
+          onmouseover="this.style.borderColor='#4b5563'; this.style.color='#fff';"
+          onmouseout="this.style.borderColor='#1E2035'; this.style.color='#d1d5db';"
+          aria-label="Sign up with GitHub"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+          </svg>
+          <span class="hidden sm:inline text-xs font-medium">GitHub</span>
+        </button>
+
+        <!-- Facebook -->
+        <button
+          type="button"
+          class="social-btn flex items-center justify-center gap-2 rounded-xl py-3 text-sm transition-all duration-200"
+          style="border:1px solid #1E2035; background-color:#090A14; color:#d1d5db;"
+          onmouseover="this.style.borderColor='#4b5563'; this.style.color='#fff';"
+          onmouseout="this.style.borderColor='#1E2035'; this.style.color='#d1d5db';"
+          aria-label="Sign up with Facebook"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.875v2.26h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
+          <span class="hidden sm:inline text-xs font-medium">Facebook</span>
+        </button>
+
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="divider-line"></div>
+        <span class="text-xs font-medium uppercase tracking-widest whitespace-nowrap" style="color:#6B7280;">Or register with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Form -->
+      <form id="registerForm" novalidate class="space-y-5">
+
+        <!-- Full name -->
+        <div class="space-y-1.5">
+          <label for="fullname" class="block text-sm font-medium text-gray-300">
+            Full name <span style="color:#DF6B33;">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input
+              id="fullname"
+              type="text"
+              placeholder="John Doe"
+              autocomplete="name"
+              class="input-field w-full rounded-xl py-3 pl-10 pr-4 text-sm text-white transition-all duration-200"
+              style="background-color:#090A14; border:1px solid #1E2035;"
+            />
+          </div>
+          <p id="fullnameError" class="hidden text-xs text-red-400">Full name is required.</p>
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label for="email" class="block text-sm font-medium text-gray-300">
+            Email address <span style="color:#DF6B33;">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+            </span>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              class="input-field w-full rounded-xl py-3 pl-10 pr-4 text-sm text-white transition-all duration-200"
+              style="background-color:#090A14; border:1px solid #1E2035;"
+            />
+          </div>
+          <p id="emailError" class="hidden text-xs text-red-400">Please enter a valid email address.</p>
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <label for="password" class="block text-sm font-medium text-gray-300">
+            Password <span style="color:#DF6B33;">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input
+              id="password"
+              type="password"
+              placeholder="Minimum 6 characters"
+              autocomplete="new-password"
+              class="input-field w-full rounded-xl py-3 pl-10 pr-11 text-sm text-white transition-all duration-200"
+              style="background-color:#090A14; border:1px solid #1E2035;"
+            />
+            <button type="button" id="togglePw" class="toggle-pw absolute inset-y-0 right-3.5 flex items-center transition-colors" style="color:#6B7280;" onmouseover="this.style.color='#d1d5db'" onmouseout="this.style.color='#6B7280'">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div id="strengthBar" class="hidden flex gap-1 mt-1">
+            <div class="strength-seg" id="seg1"></div>
+            <div class="strength-seg" id="seg2"></div>
+            <div class="strength-seg" id="seg3"></div>
+            <div class="strength-seg" id="seg4"></div>
+          </div>
+          <p id="strengthLabel" class="hidden text-xs" style="color:#6B7280;"></p>
+          <p id="pwError" class="hidden text-xs text-red-400">Password must be at least 6 characters.</p>
+        </div>
+
+        <!-- Confirm password -->
+        <div class="space-y-1.5">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-300">
+            Confirm password <span style="color:#DF6B33;">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </span>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="Re-enter your password"
+              autocomplete="new-password"
+              class="input-field w-full rounded-xl py-3 pl-10 pr-11 text-sm text-white transition-all duration-200"
+              style="background-color:#090A14; border:1px solid #1E2035;"
+            />
+            <button type="button" id="toggleConfirm" class="toggle-pw absolute inset-y-0 right-3.5 flex items-center transition-colors" style="color:#6B7280;" onmouseover="this.style.color='#d1d5db'" onmouseout="this.style.color='#6B7280'">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p id="confirmError" class="hidden text-xs text-red-400">Passwords do not match.</p>
+        </div>
+
+        <!-- Optional fields: Gender + Phone (side-by-side on md+) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Gender -->
+          <div class="space-y-1.5">
+            <label for="gender" class="block text-sm font-medium text-gray-300">
+              Gender <span style="color:#6B7280; font-weight:400;">(optional)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </span>
+              <select
+                id="gender"
+                class="select-field input-field w-full rounded-xl py-3 pl-10 pr-9 text-sm transition-all duration-200"
+                style="background-color:#090A14; border:1px solid #1E2035; color:#9ca3af;"
+              >
+                <option value="" disabled selected style="color:#6B7280;">Select gender</option>
+                <option value="male" style="background:#10111E; color:#fff;">Male</option>
+                <option value="female" style="background:#10111E; color:#fff;">Female</option>
+                <option value="other" style="background:#10111E; color:#fff;">Other</option>
+                <option value="prefer_not" style="background:#10111E; color:#fff;">Prefer not to say</option>
+              </select>
+              <!-- Custom arrow -->
+              <span class="absolute inset-y-0 right-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="space-y-1.5">
+            <label for="phone" class="block text-sm font-medium text-gray-300">
+              Phone number <span style="color:#6B7280; font-weight:400;">(optional)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none" style="color:#6B7280;">
+                <i data-lucide="phone" class="w-4 h-4"></i>
+              </span>
+              <input
+                id="phone"
+                type="tel"
+                placeholder="0912 345 678"
+                autocomplete="tel"
+                maxlength="10"
+                class="input-field w-full rounded-xl py-3 pl-10 pr-4 text-sm text-white transition-all duration-200"
+                style="background-color:#090A14; border:1px solid #1E2035;"
+              />
+            </div>
+            <p id="phoneError" class="hidden text-xs text-red-400">Phone number must be exactly 10 digits.</p>
+          </div>
+
+        </div>
+
+        <!-- Address -->
+        <div class="space-y-1.5">
+          <label for="address" class="block text-sm font-medium text-gray-300">
+            Address <span style="color:#6B7280; font-weight:400;">(optional)</span>
+          </label>
+          <div class="relative">
+            <span class="absolute top-3.5 left-3.5 pointer-events-none" style="color:#6B7280;">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </span>
+            <input
+              id="address"
+              type="text"
+              placeholder="123 Main Street, City"
+              autocomplete="street-address"
+              class="input-field w-full rounded-xl py-3 pl-10 pr-4 text-sm text-white transition-all duration-200"
+              style="background-color:#090A14; border:1px solid #1E2035;"
+            />
+          </div>
+        </div>
+
+        <!-- Terms checkbox -->
+        <div class="space-y-1.5">
+          <div class="flex items-start gap-2.5">
+            <input
+              id="terms"
+              type="checkbox"
+              class="w-4 h-4 rounded mt-0.5 flex-shrink-0 cursor-pointer"
+              style="accent-color:#DF6B33;"
+            />
+            <label for="terms" class="text-sm cursor-pointer leading-relaxed" style="color:#9ca3af;">
+              I agree to the
+              <a href="#" class="font-medium transition-colors" style="color:#DF6B33;" onmouseover="this.style.color='#C85A24'" onmouseout="this.style.color='#DF6B33'">Terms of Service</a>
+              and
+              <a href="#" class="font-medium transition-colors" style="color:#DF6B33;" onmouseover="this.style.color='#C85A24'" onmouseout="this.style.color='#DF6B33'">Privacy Policy</a>
+              <span style="color:#DF6B33;">*</span>
+            </label>
+          </div>
+          <p id="termsError" class="hidden text-xs text-red-400 pl-6">You must agree to the terms to continue.</p>
+        </div>
+
+        <!-- CTA button -->
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full text-white font-semibold rounded-xl py-3 text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-95"
+          style="background-color:#DF6B33; box-shadow:0 4px 20px rgba(223,107,51,0.25);"
+          onmouseover="this.style.backgroundColor='#C85A24'"
+          onmouseout="this.style.backgroundColor='#DF6B33'"
+        >
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          Create Account
+        </button>
+
+      </form>
+
+      <!-- Back to login -->
+      <p class="text-center text-sm mt-7" style="color:#6B7280;">
+        Already have an account?
+        <a href="login.html" class="font-semibold ml-1 transition-colors" style="color:#DF6B33;" onmouseover="this.style.color='#C85A24'" onmouseout="this.style.color='#DF6B33'">Sign in</a>
+      </p>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs mt-6 leading-relaxed" style="color:#6B7280;">
+      Protected by reCAPTCHA —
+      <a href="#" class="underline underline-offset-2 hover:text-gray-400 transition-colors">Privacy</a>
+      &amp;
+      <a href="#" class="underline underline-offset-2 hover:text-gray-400 transition-colors">Terms</a>
+    </p>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // ── Password toggle (main) ────────────────────────────────
+    function makeToggle(btnId, inputId) {
+      const btn   = document.getElementById(btnId);
+      const input = document.getElementById(inputId);
+      btn.addEventListener('click', () => {
+        const hide = input.type === 'password';
+        input.type = hide ? 'text' : 'password';
+        btn.querySelector('i').setAttribute('data-lucide', hide ? 'eye-off' : 'eye');
+        lucide.createIcons();
+      });
+    }
+    makeToggle('togglePw',      'password');
+    makeToggle('toggleConfirm', 'confirmPassword');
+
+    // ── Password strength ─────────────────────────────────────
+    const strengthColors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+    const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+    function getStrength(val) {
+      let score = 0;
+      if (val.length >= 8)               score++;
+      if (/[A-Z]/.test(val))             score++;
+      if (/[0-9]/.test(val))             score++;
+      if (/[^A-Za-z0-9]/.test(val))      score++;
+      return score; // 0-4
+    }
+
+    document.getElementById('password').addEventListener('input', function () {
+      const val   = this.value;
+      const bar   = document.getElementById('strengthBar');
+      const label = document.getElementById('strengthLabel');
+
+      if (val.length === 0) {
+        bar.classList.add('hidden');
+        label.classList.add('hidden');
+        return;
+      }
+
+      bar.classList.remove('hidden');
+      label.classList.remove('hidden');
+
+      const score = getStrength(val);
+      const level = Math.max(1, score); // at least 1 when typing
+      const color = strengthColors[level - 1];
+
+      for (let i = 1; i <= 4; i++) {
+        const seg = document.getElementById('seg' + i);
+        seg.style.backgroundColor = i <= level ? color : '#1E2035';
+      }
+      label.textContent = strengthLabels[level - 1];
+      label.style.color = color;
+    });
+
+    // ── Form validation ───────────────────────────────────────
+    function setError(inputId, errorId, show) {
+      const input = document.getElementById(inputId);
+      const err   = document.getElementById(errorId);
+      err.classList.toggle('hidden', !show);
+      if (input) input.style.borderColor = show ? '#f87171' : '#1E2035';
+    }
+
+    function clearError(inputId, errorId) {
+      setError(inputId, errorId, false);
+    }
+
+    // Live clear on input
+    [
+      ['fullname',        'fullnameError'],
+      ['email',           'emailError'],
+      ['password',        'pwError'],
+      ['confirmPassword', 'confirmError'],
+      ['phone',           'phoneError'],
+    ].forEach(([id, errId]) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => clearError(id, errId));
+    });
+
+    document.getElementById('terms').addEventListener('change', () => {
+      document.getElementById('termsError').classList.add('hidden');
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      const fullname = document.getElementById('fullname').value.trim();
+      if (!fullname) { setError('fullname', 'fullnameError', true); valid = false; }
+
+      const email = document.getElementById('email').value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailOk) { setError('email', 'emailError', true); valid = false; }
+
+      const pw = document.getElementById('password').value;
+      if (pw.length < 6) { setError('password', 'pwError', true); valid = false; }
+
+      const cpw = document.getElementById('confirmPassword').value;
+      if (cpw !== pw || cpw === '') { setError('confirmPassword', 'confirmError', true); valid = false; }
+
+      const phone = document.getElementById('phone').value.trim();
+      if (phone !== '' && !/^\d{10}$/.test(phone)) {
+        setError('phone', 'phoneError', true); valid = false;
+      }
+
+      const terms = document.getElementById('terms').checked;
+      if (!terms) {
+        document.getElementById('termsError').classList.remove('hidden');
+        valid = false;
+      }
+
+      if (valid) {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.innerHTML = `
+          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          Creating account…`;
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4"></i> Create Account`;
+          lucide.createIcons();
+        }, 2000);
+      }
+    });
+
+    // Phone: digits only
+    document.getElementById('phone').addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+
+    // Gender: update text color when selected
+    document.getElementById('gender').addEventListener('change', function () {
+      this.style.color = this.value ? '#fff' : '#9ca3af';
+    });
+  </script>
+</body>
+</html>
